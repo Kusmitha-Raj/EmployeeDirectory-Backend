@@ -2,6 +2,7 @@
 using EmployeeDirectoryApp.DTO;
 using EmployeeDirectoryApp.Models.Entities;
 using EmployeeDirectoryApp.Repository;
+using EmployeeDirectoryApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,80 +15,58 @@ namespace EmployeeDirectoryApp.Controllers
     [Authorize]
     public class DepartmentController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IDepartmentService _departmentService;
 
-        public DepartmentController(AppDbContext context)
+        public DepartmentController(IDepartmentService departmentService)
         {
-            _context = context;
+            _departmentService = departmentService;
         }
 
-        // GET: api/Department
         [HttpGet]
         public async Task<IActionResult> GetAllDepartments()
         {
-            var departments = await _context.Departments
-                .Select(d => new DepartmentResponseDTO
-                {
-                    DepartmentId = d.DepartmentId,
-                    Name = d.Name
-                }).ToListAsync();
+            var departments = await _departmentService.GetAllAsync();
             return Ok(departments);
         }
 
-        // GET: api/Department/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDepartmentById(int id)
         {
-            var d = await _context.Departments.FindAsync(id);
-            if (d == null) return NotFound("Department not found");
-
-            return Ok(new DepartmentResponseDTO
-            {
-                DepartmentId = d.DepartmentId,
-                Name = d.Name
-            });
+            var department = await _departmentService.GetByIdAsync(id);
+            if (department == null) return NotFound("Department not found");
+            return Ok(department);
         }
 
-        // POST: api/Department
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddDepartment(DepartmentDto dto)
         {
-            var existingDept = await _context.Departments
-                .FirstOrDefaultAsync(d => d.Name.ToLower() == dto.Name.ToLower());
-            if (existingDept != null)
-                return BadRequest("Department with this name already exists.");
-
-            var department = new Department { Name = dto.Name };
-            _context.Departments.Add(department);
-            await _context.SaveChangesAsync();
-            return Ok(department);
+            try
+            {
+                var department = await _departmentService.AddAsync(dto);
+                return Ok(department);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // PUT: api/Department/{id}
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDepartment(int id, DepartmentUpdateDTO dto)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department == null) return NotFound("Department not found");
-
-            department.Name = dto.Name;
-            _context.Departments.Update(department);
-            await _context.SaveChangesAsync();
-            return Ok(department);
+            var updated = await _departmentService.UpdateAsync(id, dto);
+            if (updated == null) return NotFound("Department not found");
+            return Ok(updated);
         }
 
-        // DELETE: api/Department/{id}
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department == null) return NotFound("Department not found");
-
-            _context.Departments.Remove(department);
-            await _context.SaveChangesAsync();
+            var success = await _departmentService.DeleteAsync(id);
+            if (!success) return NotFound("Department not found");
             return Ok("Department deleted");
         }
     }
