@@ -1,11 +1,7 @@
-﻿using EmployeeDirectoryApp.Data;
-using EmployeeDirectoryApp.DTO;
-using EmployeeDirectoryApp.Models.Entities;
-using EmployeeDirectoryApp.Repository;
+﻿using EmployeeDirectoryApp.DTO;
 using EmployeeDirectoryApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeDirectoryApp.Controllers
 {
@@ -15,16 +11,10 @@ namespace EmployeeDirectoryApp.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
-        private AppDbContext context;
 
         public EmployeeController(IEmployeeService employeeService)
         {
-            _employeeService = employeeService;
-        }
-
-        public EmployeeController(AppDbContext context)
-        {
-            this.context = context;
+            _employeeService = employeeService;  
         }
 
         [HttpGet]

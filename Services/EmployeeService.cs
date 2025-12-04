@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EmployeeDirectoryApp.Services
 
 {
-    public class EmployeeService
+    public class EmployeeService:IEmployeeService
     {
         private readonly AppDbContext _context;
 

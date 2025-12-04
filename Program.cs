@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<IEmployeeService,EmployeeService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
 builder.Services.AddSwaggerGen(c =>
